@@ -323,6 +323,7 @@ body {
     align-items: center;
     justify-content: space-between;
     flex-wrap: wrap;
+    margin-bottom: 35px;
 }
 
 .books__section--item {
@@ -583,4 +584,14 @@ body {
     color: #fff;
     text-decoration: none;
     padding: 9px 38px;
+}
+
+.left__btn,
+.center__btn,
+.right__btn {
+    background-color: transparent;
+    padding: 10px 12px;
+    border: 1px solid #DFE3E8;
+    border-radius: 4px;
+    cursor: pointer;
 }

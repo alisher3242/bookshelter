@@ -7,32 +7,55 @@ let bookTemlate = document.querySelector("#book__template");
 const cardTemplate = document.querySelector("#card")
 const cardList = document.querySelector(".info__card")
 const overlay = document.querySelector(".overlay")
+const input = document.querySelector(".header__left--input")
 
 const selectCollect = []
 const storage = window.localStorage
 
 
-
+let search = "python"
+let searchIndex = 0
 
 const API = async() => {
-    const dataBase = await fetch("https://www.googleapis.com/books/v1/volumes?q=python")
+    const dataBase = await fetch(`https://www.googleapis.com/books/v1/volumes?q=${search}&startIndex=${searchIndex}`)
     const base = await dataBase.json()
     const data = base.items
-    console.log(data);
+    console.log(base);
     renderSectionss(data)
-    renderData(data, list, cardList)
+    renderData(data, list, cardList, base)
 }
 API();
 
+input.addEventListener("change", () => {
+    search = input.value
+    input.value = null
+    API()
+})
 
-const renderData = (data, list, cardList) => {
-    // resulte.textContent = base.totalItems
+const paginationLeft = document.querySelector(".left__btn")
+const paginationCenter = document.querySelector(".center__btn")
+const paginationRight = document.querySelector(".right__btn")
+
+paginationLeft.addEventListener("click", () => {
+    if (searchIndex > 1) {
+        searchIndex--
+    }
+    API()
+})
+
+paginationRight.addEventListener("click", () => {
+    searchIndex++
+    API()
+})
+
+
+const renderData = (data, list, cardList, base) => {
+    resulte.textContent = `Showing ${base.totalItems} Result(s)`
     list.innerHTML = null
     data.forEach(item => {
         let cloneBookTemplate = bookTemlate.content.cloneNode("true")
         cloneBookTemplate.querySelector(".books__section--item-center-book").textContent = ` ${item.volumeInfo.title.length < 25 ? item.volumeInfo.title : item.volumeInfo.title.split(" ").slice(0,2).join(" ")}... `
-        cloneBookTemplate.querySelector(".books__section--item-center-author").textContent = ` ${item.volumeInfo.authors[0].length < 25 ? item.volumeInfo.authors : item.volumeInfo.authors[0].join(" ")}... `
-        console.log(`${item.volumeInfo.authors[0].length}`);
+        cloneBookTemplate.querySelector(".books__section--item-center-author").textContent = ` ${item.volumeInfo.authors} `
         cloneBookTemplate.querySelector(".book__img").src = `${ item.volumeInfo.imageLinks.thumbnail }`
         cloneBookTemplate.querySelector(".books__section--item").id = `${item.id}`
         cloneBookTemplate.querySelector(".bookmark").dataset.id = `${item.id}`
@@ -80,24 +103,6 @@ const renderSections = (arr, element) => {
     element.append(fragment)
 }
 
-const renderCard = (arr, element) => {
-    let fragment = document.createDocumentFragment()
-    arr.forEach(item => {
-        let cloneCard = cardTemplate.content.cloneNode("true")
-        cloneCard.querySelector(".info__card--bookImage").src = `${item.volumeInfo.imageLinks.thumbnail}`
-        cloneCard.querySelector(".info__card--text").textContent = `${item.volumeInfo.description}`
-        cloneCard.querySelector(".info__card--item-authorName1").textContent = `${item.volumeInfo.authors}`
-        cloneCard.querySelector(".info__card--item-year").textContent = `${item.volumeInfo.publishedDate}`
-        cloneCard.querySelector(".info__card--item-publishersName").textContent = `${item.volumeInfo.publisher}`
-        cloneCard.querySelector(".info__card--item-category").textContent = `${item.volumeInfo.categories}`
-        cloneCard.querySelector(".info__card--item-page").textContent = `${item.volumeInfo.pageCount}`
-        fragment.append(cloneCard)
-    })
-    element.append(fragment)
-}
-
-
-
 const renderSectionss = (data) => {
     list.addEventListener("click", (evt) => {
         if (evt.target.matches(".bookmark")) {
@@ -111,7 +116,6 @@ const renderSectionss = (data) => {
         }
     })
 }
-
 
 selectList.addEventListener("click", evt => {
     if (evt.target.matches(".book__delete")) {
